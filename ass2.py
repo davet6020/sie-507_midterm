@@ -15,49 +15,84 @@ def book():
   # 4. If not avail, ask if they have alternate choice and
   #      either book that or quit
 
-  book_get_cabin_req()
-  book_search_availability()
-  book_get_name_req()
-  exit()
-  deck = 1
-  row = 24
-  col = 1
-  ln = 'Twiggs'
-  fn = 'Rick'
-  booking = ln + ',' + fn + ',' + str(deck) + ',' + str(row) + ',' + str(col)
-  print('booking: ', booking)
+  booking = book_get_cabin_req()
+
+  book_search_availability(booking)
+  booking = book_get_name_req(booking)
+  print(booking)
+  return
+
   update_book(booking)
   update_cabin()
 
 def book_get_cabin_req():
-  print('book_get_cabin_req')
+  booking = {'Deck': [], 'Row': [], 'Column': [], 'LastName': [], 'FirstName': []}
+  print('Please specify where you would like your cabin to be located')
+  deck = row = col = 0
 
-def book_get_name_req():
-  print('book_get_name_req')
+  # Must select a valid Deck
+  while deck < 1 or deck > 3:
+    try:
+      deck = int(input('What Deck? (1-3):'))
+    except ValueError:
+      print('Choose Deck 1, 2, or 3')
+
+  booking['Deck'].append(deck)
+
+  # Must select a valid Row
+  while row < 1 or row > 24:
+    try:
+      row = int(input('What Row? (1-24):'))
+    except ValueError:
+      print('Choose Row 1 - 24')
+
+  booking['Row'].append(row)
+
+  # Must select a valid Col
+  while col < 1 or col > 2:
+    try:
+      col = int(input('What Column? (1 or 2):'))
+    except ValueError:
+      print('Choose Column 1 or 2')
+
+  booking['Column'].append(col)
+
+  return booking
+
+def book_get_name_req(booking):
+  ln = fn = ''
+
+  # Enter Last Name
+  while len(ln) == 0:
+    try:
+      ln = input('What is your last name?:')
+    except ValueError:
+      print('Enter your last name')
+
+  booking['LastName'].append(ln)
+
+  # Enter First Name
+  while len(fn) == 0:
+    try:
+      fn = input('What is your first name?:')
+    except ValueError:
+      print('Enter your first name')
+
+  booking['FirstName'].append(fn)
+
+  return booking
 
 # Called from book(). Test to see if requested
 # cabin is available
-def book_search_availability():
-  print('book_search_availability')
+def book_search_availability(booking):
+  print('Search for {}'.format(booking))
 
-
-def update_book(booking):
-  # Count # lines in booking file.  If not empty,
-  #   prepend a new line to each new row appended
-  count = len(open(booking_data).readlines())
-
-  bdata = pathlib.Path(booking_data)
-  b = open(bdata, 'a')
-
-  if count > 0:
-    b.write('\n' + booking)
+# Clear the screen for neatness
+def clear():
+  if os.name == 'nt':
+    os.system('cls')
   else:
-    b.write(booking)
-
-  b.close()
-
-def update_cabin():
-  print()
+    os.system('clear')
 
 # Display the current cabin chart from cabins.csv
 # If cabins.csv ! exist no cabins have been booked yet.
@@ -106,6 +141,30 @@ def main():
   # Check for data files and create if needed
   initialize_data_files()
 
+  while True:
+    clear()
+    menu()
+
+    # Receive user input of menu choice
+    choice = input().lower().strip()
+
+    if choice == 'd':
+      clear()
+      display()
+      input('Press enter key to continue')
+    elif choice == 'p':
+      clear()
+      book()
+      input('Press enter key to continue')
+    elif choice == 'q':
+      msg = 'Exiting.'
+      exit_program(msg)
+    else:
+      msg = 'You have selected an invalid menu choice.  Exiting.'
+      exit_program(msg)
+
+
+def menu():
   # List of menu choices makes it easier to add more later
   menu_display = ['D to display current cabin chart',
                   'P to purchase an available cabin',
@@ -115,25 +174,24 @@ def main():
   for m in menu_display:
     print(m)
 
-  # Receive user input of menu choice
-  ch = input().lower().strip()
 
-  # Run the menu choice selected
-  menu(ch)
+def update_book(booking):
+    # Count # lines in booking file.  If not empty,
+    #   prepend a new line to each new row appended
+    count = len(open(booking_data).readlines())
 
-def menu(choice):
-  if choice == 'd':
-    display()
-  elif choice == 'p':
-    book()
-  elif choice == 'q':
-    msg = 'Exiting.'
-    exit_program(msg)
-  else:
-    msg = 'You have selected an invalid menu choice.  Exiting.'
-    exit_program(msg)
+    bdata = pathlib.Path(booking_data)
+    b = open(bdata, 'a')
 
+    if count > 0:
+      b.write('\n' + booking)
+    else:
+      b.write(booking)
 
+    b.close()
 
+def update_cabin():
+    print()
 
+# Run the menu choice selected
 main()
