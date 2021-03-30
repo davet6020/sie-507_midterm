@@ -17,13 +17,23 @@ def book():
 
   booking = book_get_cabin_req()
 
-  book_search_availability(booking)
-  booking = book_get_name_req(booking)
-  print(booking)
+  if booking_available(booking):
+    booking = book_get_name_req(booking)
+    # Update the booking and cabin files to show occupied
+    update_book(booking)
+    update_cabin()
+  else:
+    # Cabin not available, try for a different one?
+    retry = input('That cabin is not available.  Try another one? (Yy/Nn)')
+    if retry.lower() == 'y':
+      clear()
+      book()
+    else:
+      msg = 'Exiting.'
+      exit_program(msg)
+
   return
 
-  update_book(booking)
-  update_cabin()
 
 def book_get_cabin_req():
   booking = {'Deck': [], 'Row': [], 'Column': [], 'LastName': [], 'FirstName': []}
@@ -82,17 +92,31 @@ def book_get_name_req(booking):
 
   return booking
 
-# Called from book(). Test to see if requested
-# cabin is available
-def book_search_availability(booking):
-  print('Search for {}'.format(booking))
-
 # Clear the screen for neatness
 def clear():
   if os.name == 'nt':
     os.system('cls')
   else:
     os.system('clear')
+
+# Called from book(). Test to see if requested
+# cabin is available
+def booking_available(booking):
+  # Get the three values from the list we want
+  tmp1 = booking['Deck'] + booking['Row'] + booking['Column']
+  # Convert those array values into a string.
+  tmp2 = list(map(str, tmp1))
+  comma = ','
+  # Convert the array values into a string
+  needle = comma.join(tmp2)
+
+  with open('booking.txt') as haystack:
+    if needle in haystack.read():
+      # Cabin is booked, not available
+      return False
+    else:
+      # Cabin is available
+      return True
 
 # Display the current cabin chart from cabins.csv
 # If cabins.csv ! exist no cabins have been booked yet.
@@ -176,19 +200,24 @@ def menu():
 
 
 def update_book(booking):
-    # Count # lines in booking file.  If not empty,
-    #   prepend a new line to each new row appended
-    count = len(open(booking_data).readlines())
+  # Get the five values from the list we want
+  tmp1 = booking['LastName'] + booking['FirstName'] + booking['Deck'] + booking['Row'] + booking['Column']
+  # Convert those array values into a string.
+  tmp2 = list(map(str, tmp1))
+  comma = ','
+  # Convert the array values into a string
+  booking = comma.join(tmp2)
 
-    bdata = pathlib.Path(booking_data)
-    b = open(bdata, 'a')
+  # Count # lines in booking file.  If not empty,
+  #   prepend a new line to each new row appended
+  count = len(open(booking_data).readlines())
 
-    if count > 0:
-      b.write('\n' + booking)
-    else:
-      b.write(booking)
+  bdata = pathlib.Path(booking_data)
+  b = open(bdata, 'a')
 
-    b.close()
+  b.write(booking + '\n')
+
+  b.close()
 
 def update_cabin():
     print()
