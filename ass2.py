@@ -8,7 +8,6 @@ booking_data = os.path.join(os.getcwd(), 'booking.txt')
 # Book a cabin will verify the cabin is available. If it is
 # Update cabin.csv and insert record into booking.txt
 def book():
-  print('Booking that cabin')
   # 1. Ask what deck, row and col
   # 2. Search booking.txt for availability
   # 3. If avail, get lastname and firstname and book it
@@ -21,7 +20,6 @@ def book():
     booking = book_get_name_req(booking)
     # Update the booking and cabin files to show occupied
     update_book(booking)
-    update_cabin()
   else:
     # Cabin not available, try for a different one?
     retry = input('That cabin is not available.  Try another one? (Yy/Nn)')
@@ -36,7 +34,7 @@ def book():
 
 
 def book_get_cabin_req():
-  booking = {'Deck': [], 'Row': [], 'Column': [], 'LastName': [], 'FirstName': []}
+  booking = {'Deck': [], 'Row': [], 'Cabin': [], 'LastName': [], 'FirstName': []}
   print('Please specify where you would like your cabin to be located')
   deck = row = col = 0
 
@@ -61,11 +59,11 @@ def book_get_cabin_req():
   # Must select a valid Col
   while col < 1 or col > 2:
     try:
-      col = int(input('What Column? (1 or 2):'))
+      col = int(input('What Cabin? (1 or 2):'))
     except ValueError:
-      print('Choose Column 1 or 2')
+      print('Choose Cabin 1 or 2')
 
-  booking['Column'].append(col)
+  booking['Cabin'].append(col)
 
   return booking
 
@@ -103,7 +101,7 @@ def clear():
 # cabin is available
 def booking_available(booking):
   # Get the three values from the list we want
-  tmp1 = booking['Deck'] + booking['Row'] + booking['Column']
+  tmp1 = booking['Deck'] + booking['Row'] + booking['Cabin']
   # Convert those array values into a string.
   tmp2 = list(map(str, tmp1))
   comma = ','
@@ -158,7 +156,7 @@ def initialize_data_files():
     c.close()
     msg += 'cabin.csv'
 
-  if(len(msg) > 1):
+  if len(msg) > 1:
     print('Created data file(s): {}'.format(msg.rstrip(', ')))
 
 def main():
@@ -194,16 +192,19 @@ def menu():
                   'P to purchase an available cabin',
                   'Q to quit']
 
-  print('Select choice from menu')
+  print('Welcome to the Pacific Princess Booking System\n')
+  print('Select a choice from menu')
   for m in menu_display:
     print(m)
 
-
+# Updates bdata (the pointer to Booking.txt) to contain name and location of cabin
 def update_book(booking):
   # Get the five values from the list we want
-  tmp1 = booking['LastName'] + booking['FirstName'] + booking['Deck'] + booking['Row'] + booking['Column']
+  tmp1 = booking['LastName'] + booking['FirstName'] + booking['Deck'] + booking['Row'] + booking['Cabin']
   # Convert those array values into a string.
   tmp2 = list(map(str, tmp1))
+  # update_cabin needs this info
+  cu = list(map(int, booking['Deck'] + booking['Row'] + booking['Cabin']))
   comma = ','
   # Convert the array values into a string
   booking = comma.join(tmp2)
@@ -214,13 +215,62 @@ def update_book(booking):
 
   bdata = pathlib.Path(booking_data)
   b = open(bdata, 'a')
-
   b.write(booking + '\n')
-
   b.close()
 
-def update_cabin():
-    print()
+  # Call the function to update cabin.csv
+  update_cabin(tmp2, cu)
+
+# Update cdata (the pointer to cabin.csv) with location of new booking
+def update_cabin(customer, cu):
+  lname = customer[0]
+  fname = customer[1]
+  deck = cu[0]
+  row = cu[1]
+  col = cu[2]
+
+  cdata = pathlib.Path(cabin_data)
+  c = open(cdata, 'r')
+  all_rows = c.readlines()
+  c.close()
+
+  new_row = all_rows[row]
+
+  # This handles placement of the X on the cabin chart
+  if deck == 1:
+    if col == 1:
+      new_row = new_row[:1] + 'X' + new_row[2:]
+    else:
+      new_row = new_row[:4] + 'X' + new_row[5:]
+
+  if deck == 2:
+    if col == 1:
+      new_row = new_row[:10] + 'X' + new_row[11:]
+    else:
+      new_row = new_row[:13] + 'X' + new_row[14:]
+
+  if deck == 3:
+    if col == 1:
+      new_row = new_row[:19] + 'X' + new_row[20:]
+    else:
+      new_row = new_row[:22] + 'X' + new_row[23:]
+
+  # Update all_rows list with new value
+  all_rows[row] = new_row
+  c = open(cdata, 'wt')
+
+  # Loop through all_rows and re-write cabin.csv
+  for row in all_rows:
+    c.write(row)
+
+  c.close()
+
+  # Confirm the booking
+  clear()
+  print('Congratulations {} {}! You have been booked on the Pacific Princess!'.format(fname, lname))
+  print("Your stateroom location is as follows:")
+  print('Deck {}: Row {}: Cabin {}'.format(cu[0], cu[1], cu[2]))
+  print()
 
 # Run the menu choice selected
 main()
