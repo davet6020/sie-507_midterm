@@ -1,3 +1,4 @@
+
 import os
 import pathlib
 
@@ -5,14 +6,14 @@ import pathlib
 cabin_data = os.path.join(os.getcwd(), 'cabin.csv')
 booking_data = os.path.join(os.getcwd(), 'booking.txt')
 
-# Book a cabin will verify the cabin is available. If it is
-# Update cabin.csv and insert record into booking.txt
+"""Book a cabin will verify the cabin is available. If it is
+Update cabin.csv and insert record into booking.txt"""
 def book():
-  # 1. Ask what deck, row and col
-  # 2. Search booking.txt for availability
-  # 3. If avail, get lastname and firstname and book it
-  # 4. If not avail, ask if they have alternate choice and
-  #      either book that or quit
+  """1. Ask what deck, row and col
+  2. Search booking.txt for availability
+  3. If avail, get lastname and firstname and book it
+  4. If not avail, ask if they have alternate choice and
+       either book that or quit"""
 
   booking = book_get_cabin_req()
 
@@ -32,7 +33,7 @@ def book():
 
   return
 
-
+'''Prompts a user for the Deck, Row and Cabin they want'''
 def book_get_cabin_req():
   booking = {'Deck': [], 'Row': [], 'Cabin': [], 'LastName': [], 'FirstName': []}
   print('Please specify where you would like your cabin to be located')
@@ -67,6 +68,7 @@ def book_get_cabin_req():
 
   return booking
 
+'''If an available cabin was selected, prompt for customers name'''
 def book_get_name_req(booking):
   ln = fn = ''
 
@@ -97,8 +99,8 @@ def clear():
   else:
     os.system('clear')
 
-# Called from book(). Test to see if requested
-# cabin is available
+'''Called from book(). Test to see if requested
+    cabin is available'''
 def booking_available(booking):
   # Get the three values from the list we want
   tmp1 = booking['Deck'] + booking['Row'] + booking['Cabin']
@@ -116,8 +118,8 @@ def booking_available(booking):
       # Cabin is available
       return True
 
-# Display the current cabin chart from cabins.csv
-# If cabins.csv ! exist no cabins have been booked yet.
+'''Display the current cabin chart from cabins.csv
+If cabins.csv ! exist no cabins have been booked yet.'''
 def display():
   cdata = pathlib.Path(cabin_data)
   c = open(cdata, 'r')
@@ -129,8 +131,8 @@ def exit_program(msg=''):
   print(msg)
   exit()
 
-# When the program is first run, check to see if the data files exist
-# If either booking.txt or cabin.csv do not exist, create them.
+'''When the program is first run, check to see if the data files exist
+If either booking.txt or cabin.csv do not exist, create them.'''
 def initialize_data_files():
   bdata = pathlib.Path(booking_data)
   cdata = pathlib.Path(cabin_data)
@@ -159,6 +161,7 @@ def initialize_data_files():
   if len(msg) > 1:
     print('Created data file(s): {}'.format(msg.rstrip(', ')))
 
+'''This is the main function. It gets things started.'''
 def main():
   # Check for data files and create if needed
   initialize_data_files()
@@ -185,7 +188,7 @@ def main():
       msg = 'You have selected an invalid menu choice.  Exiting.'
       exit_program(msg)
 
-
+'''Build and display the menu'''
 def menu():
   # List of menu choices makes it easier to add more later
   menu_display = ['D to display current cabin chart',
