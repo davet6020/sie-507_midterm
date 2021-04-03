@@ -1,3 +1,11 @@
+'''This is the Pacific Princess (The Love Boat) cabin booking tool
+Run it with Python3 and book a cruise to a faraway place.'''
+__author__      = "Richard D. Twiggs"
+__student_id__  = "1131828"
+__license__     = "MIT"
+__version__     = "1.0"
+__email__       = "richard.twiggs@maine.edu"
+__status__      = "Mid-term"
 
 import os
 import pathlib
